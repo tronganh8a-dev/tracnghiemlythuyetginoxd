@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GINO 1 建設 — Luyện Thi Lý Thuyết</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0f2044;
+  --blue:#1a4a8a;
+  --sky:#2d7dd2;
+  --accent:#f0a500;
+  --green:#1a8a4a;
+  --red:#c0392b;
+  --bg:#f0f4fa;
+  --card:#ffffff;
+  --border:#dde5f0;
+  --text:#1a2035;
+  --sub:#5a6a8a;
+  --correct-bg:#e6f7ed;
+  --correct-border:#1a8a4a;
+  --wrong-bg:#fdecea;
+  --wrong-border:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ===== HEADER ===== */
+.header{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 60%,var(--sky) 100%);
+  color:#fff;padding:28px 20px 22px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:180px;height:180px;border-radius:50%;
+  background:rgba(255,255,255,.06);
+}
+.header::after{
+  content:'';position:absolute;bottom:-30px;left:-30px;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.05);
+}
+.cre{font-size:11px;opacity:.7;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.cre strong{color:var(--accent);font-weight:700}
+.header h1{font-family:'Noto Serif JP',serif;font-size:20px;font-weight:700;line-height:1.4;margin-bottom:4px}
+.header p{font-size:12.5px;opacity:.8;margin-bottom:10px}
+.header-badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.hbadge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);
+  border-radius:20px;padding:3px 12px;font-size:11.5px;font-weight:500}
+
+/* ===== SCORE BAR ===== */
+.scorebar{
+  background:#fff;border-bottom:2px solid var(--border);
+  padding:10px 16px;display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.07);
+  flex-wrap:wrap;
+}
+.sc-item{display:flex;align-items:center;gap:5px;font-size:12.5px}
+.sc-dot{width:10px;height:10px;border-radius:50%}
+.sc-dot.done{background:var(--sky)}
+.sc-dot.correct{background:var(--green)}
+.sc-dot.wrong{background:var(--red)}
+.sc-val{font-weight:700;font-size:14px}
+.sc-label{color:var(--sub);font-size:12px}
+.sc-div{width:1px;height:20px;background:var(--border)}
+.progress-wrap{flex:1;min-width:100px}
+.progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--accent));
+  border-radius:3px;transition:width .4s ease;width:0%}
+.prog-text{font-size:11px;color:var(--sub);margin-top:2px}
+
+/* ===== WRAP ===== */
+.wrap{max-width:820px;margin:0 auto;padding:16px 14px 40px}
+
+/* ===== SECTION TITLE ===== */
+.section-title{
+  background:linear-gradient(135deg,var(--navy),var(--blue));
+  color:#fff;padding:10px 16px;border-radius:10px;
+  font-size:13.5px;font-weight:700;margin:20px 0 12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-title span{background:var(--accent);color:#000;
+  font-size:11px;padding:2px 8px;border-radius:10px;font-weight:700}
+
+/* ===== QUESTION CARD ===== */
+.q-card{
+  background:var(--card);border:1.5px solid var(--border);border-radius:12px;
+  padding:16px 18px;margin-bottom:14px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.q-card.answered{border-color:var(--border)}
+.q-card.answered.all-correct{border-left:4px solid var(--green)}
+.q-card.answered.has-wrong{border-left:4px solid var(--red)}
+
+.q-num-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.q-num{
+  background:var(--navy);color:#fff;
+  font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:10px;
+  letter-spacing:.5px;
+}
+.q-pts{font-size:11px;color:var(--sub);background:var(--bg);
+  padding:2px 8px;border-radius:8px;border:1px solid var(--border)}
+
+.q-text{
+  font-size:14px;font-weight:500;line-height:1.75;color:var(--text);
+  margin-bottom:12px;
+}
+.q-text .blank{
+  display:inline-block;background:#e8f0fb;
+  border-bottom:2px solid var(--sky);padding:0 8px;
+  border-radius:4px 4px 0 0;font-weight:700;color:var(--blue);
+  min-width:40px;text-align:center;
+}
+
+/* ===== OPTIONS ===== */
+.opts{list-style:none;display:flex;flex-direction:column;gap:7px}
+.opt{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 13px;border-radius:9px;
+  border:1.5px solid var(--border);background:#fafbfd;
+  cursor:pointer;font-size:13px;line-height:1.55;
+  transition:all .15s;user-select:none;
+}
+.opt:hover{border-color:var(--sky);background:#eef4fb}
+.opt.selected{border-color:var(--sky);background:#deedfb;color:var(--blue)}
+.opt.correct{border-color:var(--correct-border);background:var(--correct-bg);
+  color:#145a30;font-weight:600;cursor:default}
+.opt.wrong{border-color:var(--wrong-border);background:var(--wrong-bg);
+  color:#7b1a13;cursor:default}
+.opt.disabled{cursor:default;opacity:.6}
+.opt.disabled:hover{border-color:var(--border);background:#fafbfd}
+.opt-key{
+  min-width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;
+  background:var(--border);color:var(--sub);
+  transition:all .15s;flex-shrink:0;
+}
+.opt.selected .opt-key{background:var(--sky);color:#fff}
+.opt.correct .opt-key{background:var(--green);color:#fff}
+.opt.wrong .opt-key{background:var(--red);color:#fff}
+.opt-icon{margin-left:auto;font-size:16px;flex-shrink:0}
+
+/* ===== CHECK BUTTON ===== */
+.check-btn{
+  margin-top:10px;padding:8px 22px;
+  border-radius:8px;border:none;
+  background:linear-gradient(135deg,var(--sky),var(--blue));
+  color:#fff;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .2s;
+  font-family:'Noto Sans JP',sans-serif;
+  box-shadow:0 2px 6px rgba(45,125,210,.3);
+}
+.check-btn:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(45,125,210,.4)}
+.check-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* ===== EXPLANATION ===== */
+.explain{
+  display:none;margin-top:12px;
+  border-radius:0 9px 9px 9px;overflow:hidden;
+}
+.explain.show{display:block}
+.explain-header{
+  background:linear-gradient(135deg,#fff8e1,#fff3cd);
+  border-left:4px solid var(--accent);
+  padding:8px 13px;
+  display:flex;align-items:center;gap:6px;
+}
+.explain-header .ans-mark{
+  font-weight:700;font-size:12px;color:var(--accent);
+}
+.explain-header .ans-correct{
+  background:var(--green);color:#fff;
+  padding:2px 9px;border-radius:10px;font-size:12px;font-weight:700;
+}
+.explain-body{
+  background:#fffef5;border:1px solid #ffe082;border-top:none;
+  padding:10px 13px;font-size:13px;line-height:1.8;color:#3a2a00;
+}
+.explain-body .jp{
+  font-size:12.5px;color:var(--sub);margin-top:6px;padding-top:6px;
+  border-top:1px dashed #e0d0a0;
+}
+.explain-body strong{color:var(--navy);font-weight:700}
+
+/* ===== RESULT PANEL ===== */
+.result-panel{
+  display:none;
+  background:var(--card);border:2px solid var(--accent);border-radius:16px;
+  padding:22px;margin:20px 0;text-align:center;
+}
+.result-panel.show{display:block}
+.result-score{
+  font-family:'Noto Serif JP',serif;
+  font-size:52px;font-weight:700;color:var(--navy);line-height:1;margin:10px 0 4px;
+}
+.result-score span{font-size:22px;color:var(--sub);font-family:'Noto Sans JP',sans-serif}
+.result-msg{font-size:15px;color:var(--blue);font-weight:700;margin-bottom:16px}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.rg-item{background:var(--bg);border-radius:10px;padding:12px 8px;text-align:center}
+.rg-val{font-size:22px;font-weight:700;margin-bottom:2px}
+.rg-label{font-size:11px;color:var(--sub)}
+.rg-item.c .rg-val{color:var(--green)}
+.rg-item.w .rg-val{color:var(--red)}
+.rg-item.t .rg-val{color:var(--sky)}
+.retry-btn{
+  background:linear-gradient(135deg,var(--accent),#e09000);
+  color:#000;border:none;border-radius:10px;
+  padding:11px 30px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:'Noto Sans JP',sans-serif;
+  box-shadow:0 3px 10px rgba(240,165,0,.4);
+  transition:all .2s;margin-top:8px;
+}
+.retry-btn:hover{transform:translateY(-2px);box-shadow:0 5px 14px rgba(240,165,0,.5)}
+
+/* ===== SUBMIT BUTTON ===== */
+.submit-wrap{text-align:center;margin:24px 0 8px}
+.submit-btn{
+  background:linear-gradient(135deg,var(--navy),var(--blue));
+  color:#fff;border:none;border-radius:12px;
+  padding:14px 40px;font-size:15px;font-weight:700;
+  cursor:pointer;font-family:'Noto Sans JP',sans-serif;
+  box-shadow:0 4px 14px rgba(15,32,68,.3);
+  transition:all .2s;
+}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,32,68,.4)}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+@media(max-width:540px){
+  .header h1{font-size:17px}
+  .q-text{font-size:13px}
+  .opt{font-size:12.5px;padding:8px 11px}
+  .result-score{font-size:40px}
+  .result-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="cre">特定技能1号 建設分野 | <strong>Anh Trọng Dạy Gino</strong></div>
+  <h1>🏗️ GINO 1 建設 — Luyện Thi Lý Thuyết</h1>
+  <p>Bộ câu hỏi đề thi tokutei gino 1 XD · Đề 1~4 tổng hợp</p>
+  <div class="header-badges">
+    <span class="hbadge">📝 120 câu hỏi</span>
+    <span class="hbadge">⭐ 4 điểm/câu</span>
+    <span class="hbadge">🇻🇳 Giải thích tiếng Việt</span>
+  </div>
+</div>
+
+<div class="scorebar" id="scorebar">
+  <div class="sc-item"><div class="sc-dot done"></div><span class="sc-val" id="sc-done">0</span><span class="sc-label">/120 đã làm</span></div>
+  <div class="sc-div"></div>
+  <div class="sc-item"><div class="sc-dot correct"></div><span class="sc-val" id="sc-cor" style="color:var(--green)">0</span><span class="sc-label"> đúng</span></div>
+  <div class="sc-div"></div>
+  <div class="sc-item"><div class="sc-dot wrong"></div><span class="sc-val" id="sc-wrg" style="color:var(--red)">0</span><span class="sc-label"> sai</span></div>
+  <div class="sc-div"></div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div class="prog-text" id="prog-text">0% hoàn thành</div>
+  </div>
+</div>
+
+<div class="wrap" id="quizWrap">
+  <div class="result-panel" id="resultPanel">
+    <div style="font-size:13px;color:var(--sub);margin-bottom:4px">Kết quả bài thi</div>
+    <div class="result-score" id="resScore">0<span>/480</span></div>
+    <div class="result-msg" id="resMsg">Chưa có kết quả</div>
+    <div class="result-grid">
+      <div class="rg-item c"><div class="rg-val" id="res-cor">0</div><div class="rg-label">✅ Đúng</div></div>
+      <div class="rg-item w"><div class="rg-val" id="res-wrg">0</div><div class="rg-label">❌ Sai</div></div>
+      <div class="rg-item t"><div class="rg-val" id="res-pct">0%</div><div class="rg-label">📊 Tỷ lệ</div></div>
+    </div>
+    <button class="retry-btn" onclick="retry()">🔄 もう一度 — Làm lại từ đầu</button>
+  </div>
+  <!-- Questions will be rendered here -->
+</div>
+
+<div class="submit-wrap">
+  <button class="submit-btn" id="submitBtn" onclick="submitAll()" disabled>📊 採点する — Chấm điểm toàn bài</button>
+</div>
+
+<script>
+const QS = [
+  // ===== ĐỀ 1: Câu 1-30 =====
+  {id:1,sec:"📋 Đề 1 — Phần 1: Tổ chức và quan hệ công trường",
+   q:"流れよく工事（こうじ）を進（すす）めるには、専門工事業者間（せんもんこうじぎょうしゃかん）の（　　）が大切（たいせつ）です。",
+   opts:["競争（きょうそう）","チームワーク","無関心（むかんしん）"],ans:1,
+   vi:"Để thi công trôi chảy, các nhà thầu chuyên môn cần có tinh thần làm việc nhóm — <strong>チームワーク</strong>.",
+   jp:"スムーズに進めるには各業者間の「チームワーク」が不可欠です。"},
+
+  {id:2,q:"建設現場（けんせつげんば）では、先輩（せんぱい）の技能者（ぎのうしゃ）が（　　）の少（すく）ない後輩（こうはい）にアドバイスをしながら工事（こうじ）を進（すす）めています。",
+   opts:["体力（たいりょく）","経験（けいけん）","年齢（ねんれい）"],ans:1,
+   vi:"Người đi trước hướng dẫn người ít <strong>kinh nghiệm (経験)</strong> để cùng thi công hiệu quả.",
+   jp:"現場では先輩が「経験」の少ない後輩を指導します。"},
+
+  {id:3,q:"一般的（いっぱんてき）な大規模工事（だいきぼこうじ）では、（　　）が発注（はっちゅう）し、ゼネコンが施工（せこう）を行（おこな）います。",
+   opts:["職人（しょくにん）","発注者（はっちゅうしゃ）","技能実習生（ぎのうじっしゅうせい）"],ans:1,
+   vi:"Trong công trình lớn, <strong>người đặt hàng (発注者)</strong> yêu cầu thi công, còn nhà thầu tổng <strong>(ゼネコン)</strong> chịu trách nhiệm xây dựng.",
+   jp:"大規模工事では発注者がゼネコンに工事を依頼します。"},
+
+  {id:4,q:"小規模（しょうきぼ）な住宅工事（じゅうたくこうじ）では、（　　）が元請（もとうけ）となって専門工事業者（せんもんこうじぎょうしゃ）を管理（かんり）します。",
+   opts:["工務店（こうむてん）","電気会社（でんきがいしゃ）","不動産屋（ふどうさんや）"],ans:0,
+   vi:"Trong công trình nhỏ, <strong>công ty thi công nhà ở (工務店)</strong> đảm nhận vai trò nhà thầu chính và quản lý các nhà thầu phụ.",
+   jp:"小規模な住宅工事では「工務店」が元請となります。"},
+
+  {id:5,q:"建設工事（けんせつこうじ）を発注（はっちゅう）する人（ひと）や会社（かいしゃ）を何（なん）というか。",
+   opts:["設計者（せっけいしゃ）","監理者（かんりしゃ）","発注者（はっちゅうしゃ）"],ans:2,
+   vi:"Người/công ty đặt hàng thi công gọi là <strong>発注者（はっちゅうしゃ）</strong>.",
+   jp:"工事を依頼する人や会社を「発注者」といいます。"},
+
+  {id:6,q:"図面通（ずめんどお）りに工事（こうじ）がおこなわれているかを確認（かくにん）するのは誰（だれ）か。",
+   opts:["監理者（かんりしゃ）","職人（しょくにん）","現場監督（げんばかんとく）"],ans:0,
+   vi:"<strong>監理者</strong> là kỹ sư giám sát, kiểm tra xem công việc có đúng theo bản vẽ hay không.",
+   jp:"設計図通りに施工されているかを確認するのが「監理者」です。"},
+
+  {id:7,q:"建設（けんせつ）キャリアアップシステムで、技能者（ぎのうしゃ）の（　　）を登録（とうろく）する。",
+   opts:["年齢（ねんれい）","実績（じっせき）や資格（しかく）","家族（かぞく）"],ans:1,
+   vi:"Hệ thống Career Up quản lý <strong>thành tích và bằng cấp (実績や資格)</strong> để đánh giá công bằng và nâng cao chất lượng lao động.",
+   jp:"建設キャリアアップシステムでは技能者の「実績や資格」を登録します。"},
+
+  {id:8,q:"キャリアアップシステムに登録（とうろく）すると、（　　）が発行（はっこう）される。",
+   opts:["安全靴（あんぜんぐつ）","レベルカード","職長手帳（しょくちょうてちょう）"],ans:1,
+   vi:"Sau khi đăng ký, người lao động được cấp <strong>thẻ cấp độ kỹ năng (レベルカード)</strong>.",
+   jp:"登録するとスキルレベルを示す「レベルカード」が発行されます。"},
+
+  {id:9,sec:"📋 Đề 1 — Phần 2: An toàn & KY活動",
+   q:"建設現場（けんせつげんば）では、作業員（さぎょういん）どうしがあいさつをすることで、（　　）が生（う）まれ、気持（きも）ちよく作業（さぎょう）を進（すす）めることができる。",
+   opts:["一体感（いったいかん）","競争心（きょうそうしん）","無関心（むかんしん）"],ans:0,
+   vi:"Chào hỏi tạo ra <strong>cảm giác gắn bó (一体感)</strong>, giúp mọi người làm việc hiệu quả hơn.",
+   jp:"挨拶によって「一体感」が生まれ、チームワークが高まります。"},
+
+  {id:10,q:"朝（あさ）、通路（つうろ）ですれ違（ちが）うときに言（い）うあいさつは（　　）である。",
+   opts:["こんにちは","さようなら","おはようございます"],ans:2,
+   vi:"Buổi sáng tại công trường, mọi người chào nhau bằng <strong>「おはようございます」</strong>.",
+   jp:"朝のあいさつは「おはようございます」です。"},
+
+  {id:11,q:"朝礼（ちょうれい）の目的（もくてき）は（　　）を防（ふせ）ぐことである。",
+   opts:["けが","休（やす）み","遅刻（ちこく）"],ans:0,
+   vi:"Mục đích của buổi chào buổi sáng (朝礼) là phòng tránh <strong>tai nạn thương tích (けが)</strong>.",
+   jp:"朝礼の主な目的は「けが」などの労働災害を防ぐことです。"},
+
+  {id:12,q:"朝礼（ちょうれい）は（　　）行（おこな）われる。",
+   opts:["夜（よる）","毎朝（まいあさ）","昼（ひる）"],ans:1,
+   vi:"Buổi chào đầu ngày được tổ chức <strong>mỗi buổi sáng (毎朝)</strong>.",
+   jp:"朝礼は毎朝、作業開始前に行われます。"},
+
+  {id:13,q:"ラジオ体操（たいそう）は、（　　）を防（ふせ）ぐために行（おこな）う。",
+   opts:["眠気（ねむけ）","けが","遅刻（ちこく）"],ans:1,
+   vi:"Thể dục buổi sáng (ラジオ体操) giúp làm ấm cơ thể để <strong>phòng tránh chấn thương (けが)</strong>.",
+   jp:"ラジオ体操は体を温め、けがを防ぐために行います。"},
+
+  {id:14,q:"作業前（さぎょうまえ）には、（　　）が作業内容（さぎょうないよう）を説明（せつめい）する。",
+   opts:["現場監督（げんばかんとく）","作業員（さぎょういん）","職長（しょくちょう）"],ans:2,
+   vi:"Trước khi làm việc, <strong>tổ trưởng (職長)</strong> thông báo nội dung công việc cho toàn đội.",
+   jp:"作業前に「職長」が当日の作業内容を説明します。"},
+
+  {id:15,q:"危険予知活動（きけんよちかつどう）では、作業中（さぎょうちゅう）に（　　）ことを想像（そうぞう）して、事故（じこ）を防（ふせ）ぐ。",
+   opts:["早（はや）く終（お）わる","危険（きけん）が起（お）きそうな","みんなが笑（わら）う"],ans:1,
+   vi:"Hoạt động dự đoán nguy hiểm giúp công nhân tưởng tượng <strong>các tình huống nguy hiểm (危険が起きそうな)</strong> để phòng tránh tai nạn.",
+   jp:"KY活動では「危険が起きそうなこと」を予測して事故を防ぎます。"},
+
+  {id:16,q:"安全確認（あんぜんかくにん）として朝礼（ちょうれい）の最後（さいご）に行（おこな）うものはどれか。",
+   opts:["体操（たいそう）の競争（きょうそう）","声（こえ）を出（だ）して二人一組（ふたりひとくみ）で確認（かくにん）"],ans:1,
+   vi:"Cuối buổi 朝礼, thường có hoạt động <strong>xác nhận an toàn theo cặp, hô to</strong> để đảm bảo mọi người ghi nhớ nội dung.",
+   jp:"朝礼の最後は二人一組で声を出して安全確認をします。"},
+
+  {id:17,q:"朝礼（ちょうれい）の最後（さいご）に全員（ぜんいん）で言（い）うあいさつは「今日（きょう）も（　　）に！」である。",
+   opts:["元気（げんき）","安全（あんぜん）","おつかれ"],ans:1,
+   vi:"Cuối buổi chào, mọi người cùng hô <strong>「今日もご安全に！(Chúc an toàn hôm nay nữa！)」</strong>.",
+   jp:"朝礼の締めは「今日もご安全に！」と全員で唱和します。"},
+
+  {id:18,q:"タッチアンドコールで行（おこな）うことはどれか。",
+   opts:["機械（きかい）を操作（そうさ）する","体操（たいそう）する","指差（ゆびさ）しして声（こえ）に出（だ）す","道具（どうぐ）を片付（かたづ）ける"],ans:2,
+   vi:"「Touch and Call」là hành động <strong>vừa chỉ tay vừa hô to</strong> để xác nhận an toàn và tăng tinh thần đoàn kết.",
+   jp:"タッチアンドコールとは、指差しをして声に出す安全確認動作です。"},
+
+  {id:19,q:"KY活動（かつどう）は（　　）を予測（よそく）してみんなで共有（きょうゆう）する活動（かつどう）である。",
+   opts:["危険（きけん）","天気（てんき）","人数（にんずう）","仕事時間（しごとじかん）"],ans:0,
+   vi:"KY活動 (Kiken Yochi) là hoạt động <strong>nhận diện và chia sẻ nguy hiểm (危険)</strong> để phòng tránh tai nạn.",
+   jp:"KY活動の「KY」は「危険予知」の略で、危険を予測して共有します。"},
+
+  {id:20,q:"KY活動（かつどう）の目的（もくてき）はどれか。",
+   opts:["作業（さぎょう）を早く（はやく）終わらせること","事故（じこ）を防止（ぼうし）すること","給料（きゅうりょう）を上げること"],ans:1,
+   vi:"Mục đích của KY活動 là <strong>phòng ngừa tai nạn (事故を防止)</strong> và đảm bảo an toàn cho người lao động.",
+   jp:"KY活動の目的は「事故を防止すること」です。"},
+
+  {id:21,q:"KY活動（かつどう）では、危険（きけん）に対する（　　）を全員（ぜんいん）で考（かんが）える。",
+   opts:["目標（もくひょう）","対策（たいさく）","目的（もくてき）"],ans:1,
+   vi:"Trong KY, công nhân cùng nhau suy nghĩ đưa ra <strong>biện pháp đối phó (対策)</strong> với nguy hiểm.",
+   jp:"KY活動では危険に対する「対策」を全員で考えます。"},
+
+  {id:22,q:"KYボードに向（む）かって全員（ぜんいん）で声（こえ）を出（だ）す目的（もくてき）はどれか。",
+   opts:["危険（きけん）を確認（かくにん）し、意識（いしき）を高（たか）めるため","仕事（しごと）の順番（じゅんばん）を覚（おぼ）えるため","チームを分（わ）けるため","時間（じかん）を計（はか）るため"],ans:0,
+   vi:"Đồng thanh hô to tên nguy hiểm nhằm <strong>nâng cao ý thức an toàn (意識を高める)</strong> cho mọi người trước khi làm việc.",
+   jp:"KYボードへの唱和は危険を確認し、安全意識を高めるためです。"},
+
+  {id:23,sec:"📋 Đề 1 — Phần 3: Luật lao động",
+   q:"日本（にほん）は（　　）国家（こっか）であり、労働法（ろうどうほう）などの法律（ほうりつ）を守（まも）る必要（ひつよう）がある。",
+   opts:["民主（みんしゅ）","自由（じゆう）","法治（ほうち）"],ans:2,
+   vi:"Nhật Bản là <strong>quốc gia pháp trị (法治国家)</strong>, tức là mọi người phải tuân thủ luật pháp.",
+   jp:"日本は「法治国家」であり、全員が法律を守る義務があります。"},
+
+  {id:24,q:"働く（はたらく）うえで守（まも）らなければならない法律（ほうりつ）の例（れい）として、正しい（ただしい）ものはどれか。",
+   opts:["交通（こうつう）ルール","労働法（ろうどうほう）","民法（みんぽう）"],ans:1,
+   vi:"Khi làm việc tại Nhật, người lao động bắt buộc phải tuân theo <strong>luật lao động (労働法)</strong>.",
+   jp:"働くうえで必ず守るべき法律の代表例が「労働法」です。"},
+
+  {id:25,q:"労働基準法（ろうどうきじゅんほう）は、労働者（ろうどうしゃ）を（　　）するための法律（ほうりつ）である。",
+   opts:["雇用（こよう）","保護（ほご）","紹介（しょうかい）"],ans:1,
+   vi:"Luật tiêu chuẩn lao động nhằm <strong>bảo vệ người lao động (保護)</strong> trong mối quan hệ với người sử dụng lao động.",
+   jp:"「労働基準法」は労働者を「保護」するための法律です。"},
+
+  {id:26,q:"労働基準法（ろうどうきじゅんほう）で決められている「労働条件（ろうどうじょうけん）」に含まれない（ふくまれない）ものはどれか。",
+   opts:["給料（きゅうりょう）や労働時間（ろうどうじかん）","職場（しょくば）の安全（あんぜん）と衛生（えいせい）","社員（しゃいん）の趣味（しゅみ）"],ans:2,
+   vi:"Điều kiện lao động bao gồm lương, giờ làm, an toàn... <strong>Sở thích của nhân viên (趣味)</strong> không liên quan.",
+   jp:"労働条件には給料や労働時間などが含まれますが、社員の趣味は含まれません。"},
+
+  {id:27,q:"労働条件（ろうどうじょうけん）は、労働者（ろうどうしゃ）と（　　）が平等（びょうどう）な立場（たちば）で決める（きめる）ものである。",
+   opts:["社長（しゃちょう）","使用者（しようしゃ）","友人（ゆうじん）"],ans:1,
+   vi:"Điều kiện lao động do <strong>người sử dụng lao động (使用者)</strong> và người lao động thỏa thuận công bằng.",
+   jp:"労働条件は「使用者」と労働者が対等な立場で決めます。"},
+
+  {id:28,q:"パワー・ハラスメントとは何（なに）か。正しい（ただしい）ものを選びなさい（えらびなさい）。",
+   opts:["大きな（おおきな）声（こえ）であいさつすること","仕事（しごと）でまちがいを教える（おしえる）こと","立場（たちば）を利用（りよう）して苦しめる（くるしめる）こと"],ans:2,
+   vi:"パワハラ là <strong>hành vi lạm dụng vị trí cao hơn để gây khó dễ hoặc tổn thương</strong> người khác.",
+   jp:"パワハラとは、立場の優位性を利用して精神的・肉体的に相手を苦しめることです。"},
+
+  {id:29,q:"労働時間（ろうどうじかん）が8時間（じかん）を超える（こえる）場合（ばあい）、休憩時間（きゅうけいじかん）は（　　）必要（ひつよう）である。",
+   opts:["30分（ふん）","45分（ふん）","1時間（じかん）"],ans:2,
+   vi:"Nếu làm việc trên 8 tiếng, bắt buộc phải nghỉ giải lao ít nhất <strong>1 tiếng</strong>.",
+   jp:"8時間を超える場合は「1時間」以上の休憩が必要です。"},
+
+  {id:30,q:"労働者（ろうどうしゃ）を解雇（かいこ）する場合（ばあい）、何日前（なんにちまえ）に予告（よこく）する必要（ひつよう）があるか。",
+   opts:["7日前（かまえ）","14日前（かまえ）","30日前（にちまえ）"],ans:2,
+   vi:"Khi cho người lao động nghỉ việc, cần báo trước ít nhất <strong>30 ngày (30日前)</strong> theo luật.",
+   jp:"解雇予告は「30日前」までに行う必要があります。"},
+
+  // ===== ĐỀ 2: Câu 31-60 =====
+  {id:31,sec:"📋 Đề 2 — Phần 1: Giờ làm & Bảo hiểm",
+   q:"労働時間（ろうどうじかん）が6時間（じかん）を超える（こえる）場合（ばあい）、休憩時間（きゅうけいじかん）は（　　）以上（いじょう）必要（ひつよう）である。",
+   opts:["30分（ふん）","45分（ふん）","1時間（じかん）"],ans:1,
+   vi:"Làm trên 6 tiếng → phải nghỉ ít nhất <strong>45 phút</strong>. Làm trên 8 tiếng → ít nhất <strong>1 tiếng</strong>.",
+   jp:"6時間超なら45分以上、8時間超なら1時間以上の休憩が必要です。"},
+
+  {id:32,q:"有給休暇（ゆうきゅうきゅうか）の買い取り（かいとり）について正しい（ただしい）ものはどれですか。",
+   opts:["使用者（しようしゃ）が買い取ってもよい","買い取っても買い取らなくてもよい","買い取るのは違法（いほう）である"],ans:2,
+   vi:"Mua lại ngày nghỉ có lương (有給休暇) là <strong>hành vi vi phạm pháp luật (違法)</strong>.",
+   jp:"有給休暇の買い取りは原則として「違法」です。"},
+
+  {id:33,q:"労働安全衛生法（ろうどうあんぜんえいせいほう）の目的（もくてき）は、労働者（ろうどうしゃ）の安全（あんぜん）と（　　）を確保（かくほ）することである。",
+   opts:["お金（かね）","健康（けんこう）","給料（きゅうりょう）"],ans:1,
+   vi:"Luật an toàn vệ sinh lao động nhằm đảm bảo <strong>an toàn và sức khỏe (健康)</strong> cho người lao động.",
+   jp:"「労働安全衛生法」の目的は労働者の安全と「健康」を確保することです。"},
+
+  {id:34,q:"建設現場（けんせつげんば）で安全旗（あんぜんはた）や安全衛生旗（えいせいはた）を掲げる（かかげる）目的（もくてき）として正しいものはどれですか。",
+   opts:["現場（げんば）の売上（うりあげ）を上げるため","危険物（きけんぶつ）を隠（かく）すため","無事故（むじこ）・無災害（むさいがい）を目指し（めざし）、意識（いしき）を高める（たかめる）ため","作業員（さぎょういん）に厳しくするため"],ans:2,
+   vi:"Cờ an toàn nhằm <strong>nâng cao ý thức phòng tránh tai nạn (無事故・無災害)</strong> cho toàn bộ công nhân.",
+   jp:"安全旗は「無事故・無災害」を目指し、安全意識を高めるために掲げます。"},
+
+  {id:35,q:"労働者（ろうどうしゃ）は、災害（さいがい）を防止（ぼうし）するため、関係者（かんけいしゃ）が行う（おこなう）措置（そち）に（　　）することが求められる（もとめ）。",
+   opts:["無視（むし）","協力（きょうりょく）","拒否（きょひ）","連絡（れんらく）"],ans:1,
+   vi:"Người lao động cần <strong>phối hợp (協力)</strong> với người liên quan để thực hiện các biện pháp phòng ngừa tai nạn.",
+   jp:"労働者は安全対策に「協力」することが求められます。"},
+
+  {id:36,q:"建設現場（けんせつげんば）での死亡事故（しぼうじこ）の原因（げんいん）として最（もっと）も多（おお）いものはどれですか。",
+   opts:["転落（てんらく）・墜落（ついらく）","交通事故（こうつうじこ）","感電（かんでん）","火災（かさい）"],ans:0,
+   vi:"Nguyên nhân gây tử vong nhiều nhất tại công trường là <strong>té ngã từ trên cao (転落・墜落)</strong>.",
+   jp:"建設現場での死亡事故の最多原因は「転落・墜落」です。"},
+
+  {id:37,q:"KY活動（かつどう）は、（　　）を予測（よそく）し、事故（じこ）を防ぐための活動である。",
+   opts:["危険（きけん）","気温（きおん）","音楽（おんがく）"],ans:0,
+   vi:"KY活動 (Kiken Yochi) dự đoán <strong>nguy hiểm (危険)</strong> để phòng tránh tai nạn lao động.",
+   jp:"KYは「危険予知」の略で、危険を予測して事故を防ぐ活動です。"},
+
+  {id:38,q:"健康診断（けんこうしんだん）は、何年（なんねん）に何回（なんかい）以上行（おこな）わなければなりませんか。",
+   opts:["1年（ねん）に1回（かい）","3年（ねん）に1回（かい）","5年（ねん）に2回（かい）","毎月（まいつき）1回（かい）"],ans:0,
+   vi:"Doanh nghiệp phải tổ chức <strong>khám sức khỏe 1 năm 1 lần (年1回)</strong> cho người lao động.",
+   jp:"健康診断は「1年に1回」以上義務付けられています。"},
+
+  {id:39,q:"ストレスチェックは、何人（なんにん）以上（いじょう）の事業場（じぎょうじょう）で義務（ぎむ）がありますか。",
+   opts:["10人（にん）","30人（にん）","50人（にん）","100人（にん）"],ans:2,
+   vi:"Doanh nghiệp từ <strong>50 người trở lên</strong> phải thực hiện kiểm tra mức độ căng thẳng (ストレスチェック) mỗi năm.",
+   jp:"50人以上の事業場でストレスチェックが義務付けられています。"},
+
+  {id:40,q:"最低賃金（さいていちんぎん）は、労働者（ろうどうしゃ）に（　　）賃金（ちんぎん）を支払う（しはらう）ための決（き）まりです。",
+   opts:["できるだけ安い（やすい）","一律（いちりつ）の","最低限（さいていげん）の"],ans:2,
+   vi:"Lương tối thiểu là <strong>mức lương thấp nhất (最低限)</strong> mà người sử dụng lao động bắt buộc phải trả.",
+   jp:"最低賃金とは、労働者に支払わなければならない「最低限」の賃金です。"},
+
+  {id:41,sec:"📋 Đề 2 — Phần 2: Bảo hiểm lao động",
+   q:"労災保険（ろうさいほけん）は、労働者（ろうどうしゃ）が仕事中（しごとちゅう）にけがをしたときに（　　）される。",
+   opts:["けいさつに連絡（れんらく）","病院（びょういん）に行かせない","保険給付（ほけんきゅうふ）が行われる"],ans:2,
+   vi:"Nếu bị thương khi làm việc, người lao động sẽ được nhận <strong>trợ cấp bảo hiểm (保険給付)</strong>.",
+   jp:"仕事中のけがには「保険給付」が行われます。"},
+
+  {id:42,q:"労災保険（ろうさいほけん）の保険料（ほけんりょう）は（　　）が全額（ぜんがく）負担（ふたん）します。",
+   opts:["労働者（ろうどうしゃ）","会社（かいしゃ）","家族（かぞく）"],ans:1,
+   vi:"Phí bảo hiểm tai nạn lao động do <strong>công ty (会社)</strong> chi trả toàn bộ, người lao động không phải đóng.",
+   jp:"労災保険料は「会社（事業主）」が全額負担します。"},
+
+  {id:44,q:"労災保険（ろうさいほけん）では、怪我（けが）で働（はたら）けないときに何（なに）がもらえますか。",
+   opts:["休業給付（きゅうぎょうきゅうふ）","通勤手当（つうきんてあて）","年金（ねんきん）"],ans:0,
+   vi:"Nếu không thể làm việc do tai nạn, bạn nhận được <strong>trợ cấp nghỉ việc (休業給付)</strong>.",
+   jp:"怪我で働けないときは「休業給付」を受けられます。"},
+
+  {id:45,q:"労災保険（ろうさいほけん）の特別加入（とくべつかにゅう）制度（せいど）は、どのような人（ひと）が対象（たいしょう）ですか。",
+   opts:["毎日通勤している学生（がくせい）","建設業（けんせつぎょう）の一人親方（ひとりおやかた）や家族労働者（かぞくろうどうしゃ）","会社（かいしゃ）の社長（しゃちょう）"],ans:1,
+   vi:"Chế độ tham gia đặc biệt áp dụng cho <strong>thợ tự do và người làm cùng gia đình trong ngành xây dựng</strong>.",
+   jp:"建設業の「一人親方」などが特別加入制度の対象です。"},
+
+  {id:46,q:"「労災（ろうさい）かくし」をすると、どうなりますか。",
+   opts:["法律（ほうりつ）に違反（いはん）する","被災者（ひさいしゃ）は休暇（きゅうか）がもらえる","労災保険（ろうさいほけん）を使える（つかえる）"],ans:0,
+   vi:"Che giấu tai nạn lao động (労災かくし) là <strong>hành vi vi phạm pháp luật (違反)</strong> và có thể bị xử phạt.",
+   jp:"「労災かくし」は違法行為であり、罰則の対象となります。"},
+
+  {id:47,q:"雇用保険（こようほけん）に加入（かにゅう）すると、もらえるものはどれですか。",
+   opts:["国民健康保険証（こくみんけんこうほけんしょう）","雇用保険被保険者証（こようほけんひほけんしゃしょう）","社員証（しゃいんしょう）"],ans:1,
+   vi:"Sau khi tham gia bảo hiểm thất nghiệp, nhận được <strong>chứng nhận người được bảo hiểm (被保険者証)</strong>.",
+   jp:"雇用保険加入時は「雇用保険被保険者証」が発行されます。"},
+
+  {id:48,q:"雇用保険（こようほけん）の給付（きゅうふ）を受ける（うける）には、どうすればいいですか。",
+   opts:["病院（びょういん）に行く","会社（かいしゃ）に働き続ける","失業（しつぎょう）して仕事（しごと）ができない状態（じょうたい）である"],ans:2,
+   vi:"Muốn nhận trợ cấp thất nghiệp phải đang trong trạng thái <strong>thất nghiệp, có ý muốn đi làm nhưng chưa có việc</strong>.",
+   jp:"雇用保険の給付を受けるには「失業して仕事ができない状態」である必要があります。"},
+
+  {id:49,q:"建設労働者（けんせつろうどうしゃ）雇用改善法（こようかいぜんほう）の目的（もくてき）はどれですか。",
+   opts:["会社の利益（りえき）を上げること","建設で使う機械（きかい）を増やすこと","建設労働者の雇用環境（こようかんきょう）をよくすること"],ans:2,
+   vi:"Luật này nhằm <strong>cải thiện môi trường làm việc (雇用環境)</strong> cho người lao động trong ngành xây dựng.",
+   jp:"建設労働者雇用改善法は建設労働者の「雇用環境をよくする」ことを目的とします。"},
+
+  {id:50,q:"「建設雇用改善計画（けんせつこようかいぜんけいかく）」の内容（ないよう）として正（ただ）しいのはどれですか。",
+   opts:["若年者（じゃくねんしゃ）の育成（いくせい）と確保（かくほ）","建設会社（かいしゃ）の輸出（ゆしゅつ）を増やす","ビルを高く建てる"],ans:0,
+   vi:"Một nội dung quan trọng là <strong>đào tạo và đảm bảo nguồn nhân lực trẻ tuổi (若年者の育成と確保)</strong>.",
+   jp:"建設雇用改善計画の重要な内容は「若年者の育成と確保」です。"},
+
+  {id:51,sec:"📋 Đề 2 — Phần 3: Luật phát triển nghề nghiệp",
+   q:"「職業能力開発（しょくぎょうのうりょくかいはつ）」や「技能継承（ぎのうけいしょう）」のために行（おこな）われることはどれですか。",
+   opts:["職業訓練（しょくぎょうくんれん）の実施（じっし）","建物（たてもの）の解体（かいたい）","建設機械（けんせつきかい）の販売（はんばい）"],ans:0,
+   vi:"Để phát triển năng lực và kế thừa kỹ năng, cần thực hiện <strong>đào tạo nghề (職業訓練)</strong>.",
+   jp:"職業能力開発のために「職業訓練の実施」が行われます。"},
+
+  {id:52,q:"外国人（がいこくじん）労働者（ろうどうしゃ）への対応（たいおう）として正しいものはどれですか。",
+   opts:["技能実習生（ぎのうじっしゅうせい）や特定技能（とくていぎのう）の人を適正（てきせい）に受け入れること","外国人を全員断ること","給料（きゅうりょう）を減らすこと"],ans:0,
+   vi:"Cần quản lý việc làm <strong>đúng đắn cho lao động nước ngoài</strong>, bao gồm thực tập sinh và người có tư cách đặc định.",
+   jp:"外国人労働者は「適正に受け入れる」ことが求められます。"},
+
+  {id:53,q:"「職業能力開発促進法（しょくぎょうのうりょくかいはつそくしんほう）」の目的（もくてき）は何（なん）ですか。",
+   opts:["労働者（ろうどうしゃ）の職業能力（しょくぎょうのうりょく）を高（たか）めること","会社（かいしゃ）の売上（うりあげ）を増やすこと","休憩時間（きゅうけいじかん）を短くすること"],ans:0,
+   vi:"Mục đích là <strong>nâng cao năng lực nghề nghiệp (職業能力を高める)</strong> của người lao động thông qua đào tạo.",
+   jp:"職業能力開発促進法の目的は「労働者の職業能力を高めること」です。"},
+
+  {id:54,q:"技能検定（ぎのうけんてい）に合格（ごうかく）すると、どのような証明（しょうめい）を受けられますか。",
+   opts:["技能士（ぎのうし）の資格（しかく）を持つことができる","年金（ねんきん）を多くもらえる","病院代（びょういんだい）が無料（むりょう）になる"],ans:0,
+   vi:"Thi đậu kiểm tra kỹ năng → được nhận chứng chỉ và có thể xưng là <strong>kỹ năng sư (技能士)</strong>.",
+   jp:"技能検定に合格すると「技能士」の称号が与えられます。"},
+
+  {id:55,q:"建設業法（けんせつぎょうほう）の目的（もくてき）は何（なん）ですか。",
+   opts:["工事（こうじ）の契約（けいやく）を適正（てきせい）に行い、建設業界（けんせつぎょうかい）を健全（けんぜん）に発展させること","工事（こうじ）の費用（ひよう）を安くすること","建設現場（げんば）での食事（しょくじ）を提供すること"],ans:0,
+   vi:"Mục tiêu là <strong>đảm bảo hợp đồng đúng đắn và phát triển lành mạnh ngành xây dựng</strong>.",
+   jp:"建設業法の目的は「工事の適正な契約と建設業界の健全な発展」です。"},
+
+  {id:56,q:"建設業法（けんせつぎょうほう）により、発注者（はっちゅうしゃ）の何（なに）が守られますか。",
+   opts:["施工体制（せこうたいせい）の明確化（めいかくか）などによる保護（ほご）","建物（たてもの）の色（いろ）を選べること","作業員（さぎょういん）にプレゼントを贈（おく）ること"],ans:0,
+   vi:"Luật xây dựng quy định <strong>hệ thống thi công rõ ràng</strong> để bảo vệ quyền lợi của chủ đầu tư (発注者).",
+   jp:"建設業法は施工体制の明確化などにより「発注者を保護」します。"},
+
+  {id:57,q:"労働安全衛生法（ろうどうあんぜんえいせいほう）の目的（もくてき）は何（なん）ですか。",
+   opts:["職場（しょくば）の安全（あんぜん）と健康（けんこう）を守ること","作業員（さぎょういん）にボーナスを支給（しきゅう）すること","会社（かいしゃ）の売上（うりあげ）を上げること","残業（ざんぎょう）を増やすこと"],ans:0,
+   vi:"Luật an toàn vệ sinh lao động nhằm <strong>bảo vệ an toàn và sức khỏe (安全と健康を守る)</strong> của người lao động.",
+   jp:"労働安全衛生法の目的は「職場の安全と健康を守ること」です。"},
+
+  {id:59,q:"廃棄物処理法（はいきぶつしょりほう）の目的（もくてき）は何（なん）ですか。",
+   opts:["人びとの生活環境（せいかつかんきょう）を守ること","建物（たてもの）の設計（せっけい）を変更（へんこう）すること","工事現場（こうじげんば）を拡大（かくだい）すること"],ans:0,
+   vi:"Mục đích là <strong>bảo vệ môi trường sống của con người</strong> bằng cách kiểm soát và xử lý rác thải hợp lý.",
+   jp:"廃棄物処理法の目的は「人びとの生活環境を守ること」です。"},
+
+  {id:60,q:"産業廃棄物（さんぎょうはいきぶつ）を処理（しょり）するには、何（なに）が必要（ひつよう）ですか。",
+   opts:["処理（しょり）の許可（きょか）","電気工事士（でんきこうじし）の免許（めんきょ）","マンガを読む許可","自動車（じどうしゃ）免許（めんきょ）"],ans:0,
+   vi:"Để xử lý chất thải công nghiệp cần có <strong>giấy phép xử lý (処理の許可)</strong> theo quy định.",
+   jp:"産業廃棄物を処理するには「処理の許可」が必要です。"},
+
+  // ===== ĐỀ 3: Câu 61-90 =====
+  {id:61,sec:"📋 Đề 3 — Phần 1: Luật môi trường",
+   q:"建設リサイクル法（けんせつりさいくるほう）の目的（もくてき）は何（なん）ですか。",
+   opts:["廃材（はいざい）の適切（てきせつ）な処理（しょり）や再資源化（さいしげんか）","建物（たてもの）を自由（じゆう）に壊すこと","ゴミを他の現場（げんば）に運ぶこと","新しい工具（こうぐ）を使うこと"],ans:0,
+   vi:"Luật tái chế xây dựng yêu cầu <strong>phân loại và xử lý phế thải đúng cách, tái sử dụng tài nguyên</strong>.",
+   jp:"建設リサイクル法は「廃材の適切な処理・再資源化」を目的とします。"},
+
+  {id:62,q:"工事現場（こうじげんば）で発生（はっせい）した廃棄物（はいきぶつ）はどうしなければなりませんか。",
+   opts:["決められた方法（ほうほう）で分類（ぶんるい）し保管（ほかん）する","すぐに燃やす","そのまま道路（どうろ）に置く","家庭（かてい）に持ち帰る"],ans:0,
+   vi:"Rác thải công trường phải được <strong>phân loại và bảo quản đúng quy định</strong>.",
+   jp:"現場の廃棄物は「決められた方法で分類・保管」しなければなりません。"},
+
+  {id:63,q:"大気汚染防止法（たいきおせんぼうしほう）は、何（なに）を防止（ぼうし）するための法律（ほうりつ）ですか。",
+   opts:["空気（くうき）の汚染（おせん）","地面（じめん）の汚れ","水（みず）の使用量（しようりょう）","建物（たてもの）の色"],ans:0,
+   vi:"Luật phòng chống ô nhiễm không khí nhằm ngăn chặn <strong>ô nhiễm không khí (空気の汚染)</strong> từ nhà máy và công trường.",
+   jp:"大気汚染防止法は「空気の汚染」を防ぐための法律です。"},
+
+  {id:64,q:"アスベストを含（ふく）む建物（たてもの）を解体（かいたい）する場合（ばあい）、いつまでに届出（とどけで）が必要（ひつよう）ですか。",
+   opts:["14日前（かまえ）まで","当日（とうじつ）","1週間後（しゅうかんご）","1か月後（げつご）"],ans:0,
+   vi:"Khi phá dỡ công trình có amiăng, phải thông báo cho cơ quan chức năng <strong>trước 14 ngày (14日前)</strong>.",
+   jp:"アスベスト含有建物の解体は「14日前まで」に届出が必要です。"},
+
+  {id:65,q:"騒音規制法（そうおんきせいほう）は、何（なに）を目的（もくてき）としていますか。",
+   opts:["人（ひと）の健康（けんこう）や生活環境（せいかつかんきょう）を守るため","作業員（さぎょういん）の人数（にんずう）を増やすため","工事（こうじ）を長く続けるため","建物（たてもの）のデザインを決めるため"],ans:0,
+   vi:"Luật kiểm soát tiếng ồn nhằm <strong>bảo vệ sức khỏe và môi trường sống</strong> bằng cách giới hạn mức ồn.",
+   jp:"騒音規制法の目的は「人の健康や生活環境を守ること」です。"},
+
+  {id:66,q:"建設工事（けんせつこうじ）の騒音（そうおん）や振動（しんどう）を減らすためには、どれが正しいですか。",
+   opts:["低騒音型（ていそうおんがた）機械（きかい）を使う","夜中（よなか）に作業する","機械（きかい）を大声（おおごえ）で使う","防音施設（ぼうおんしせつ）を壊す"],ans:0,
+   vi:"Sử dụng <strong>máy móc ít tiếng ồn (低騒音型機械)</strong> là biện pháp giảm ảnh hưởng tới khu vực xung quanh.",
+   jp:"騒音・振動を減らすには「低騒音型機械を使う」ことが効果的です。"},
+
+  {id:67,q:"水質汚濁防止法（すいしつおだくぼうしほう）は、何（なに）を守（まも）るための法律（ほうりつ）ですか。",
+   opts:["水（みず）の汚染（おせん）を防ぐ","工事（こうじ）のスピードを上げる","川（かわ）に魚（さかな）を入れる","建物を高く建てる"],ans:0,
+   vi:"Luật phòng chống ô nhiễm nước bảo vệ <strong>chất lượng nước (水の汚染を防ぐ)</strong> như sông, hồ khỏi nước thải.",
+   jp:"水質汚濁防止法は「水の汚染を防ぐ」ための法律です。"},
+
+  {id:68,q:"消防法（しょうぼうほう）の目的（もくてき）はどれですか。",
+   opts:["火災（かさい）や地震（じしん）による被害（ひがい）を減らすこと","たくさん火（ひ）を使えるようにすること","建物（たてもの）の色（いろ）を変えること","工事現場（げんば）を静かにすること"],ans:0,
+   vi:"Mục tiêu chính của Luật Phòng cháy là <strong>ngăn ngừa và giảm thiểu thiệt hại do hỏa hoạn và động đất</strong>.",
+   jp:"消防法の目的は「火災・地震による被害を減らすこと」です。"},
+
+  {id:69,q:"水道法（すいどうほう）で定（さだ）められている技術者（ぎじゅつしゃ）や技能者（ぎのうしゃ）は、どのように作業（さぎょう）を行（おこな）う必要（ひつよう）がありますか。",
+   opts:["自己判断（じこはんだん）で自由に作業する","作業者（さぎょうしゃ）の指示（しじ）に従わず作業する","技術者（ぎじゅつしゃ）などの指示（しじ）のもとで作業する"],ans:2,
+   vi:"Theo luật, người lao động phải làm việc <strong>theo sự chỉ dẫn của kỹ sư (指示のもとで)</strong> được bố trí theo pháp luật.",
+   jp:"水道工事は「技術者などの指示のもと」で作業する必要があります。"},
+
+  {id:71,q:"ガス事業法（がすじぎょうほう）の目的（もくてき）はどれですか。",
+   opts:["ガスをできるだけ安く販売（はんばい）する","ガス使用者（しようしゃ）の保護（ほご）と保安（ほあん）の確保（かくほ）","ガスのにおいをなくすこと"],ans:1,
+   vi:"Luật kinh doanh gas nhằm <strong>bảo vệ người dùng và đảm bảo an toàn (保護と保安)</strong> khi sử dụng gas.",
+   jp:"ガス事業法は「ガス使用者の保護と保安の確保」を目的とします。"},
+
+  {id:72,q:"電気事業法（でんきじぎょうほう）では、何（なに）を守（まも）るために電気設備（でんきせつび）などの基準（きじゅん）を定（さだ）めていますか。",
+   opts:["電気（でんき）を高く売るため","使用者（しようしゃ）の利益（りえき）と公共（こうきょう）の安全（あんぜん）を守るため","感電（かんでん）しても驚かないようにするため"],ans:1,
+   vi:"Luật điện lực quy định tiêu chuẩn để <strong>bảo vệ quyền lợi người dùng và an toàn công cộng</strong>.",
+   jp:"電気事業法は「使用者の利益と公共の安全を守る」ために基準を設けています。"},
+
+  {id:73,q:"電気通信事業法（でんきつうしんじぎょうほう）で、工事（こうじ）を行（おこな）うときに必要（ひつよう）なものは何（なん）ですか。",
+   opts:["テレビ","工事担任者（こうじたんにんしゃ）の資格（しかく）","電気ストーブ"],ans:1,
+   vi:"Để thi công viễn thông đúng quy cách, cần có <strong>chứng chỉ 工事担任者</strong>.",
+   jp:"電気通信工事には「工事担任者の資格」が必要です。"},
+
+  {id:74,q:"電波法（でんぱほう）では、無線機（むせんき）を使（つか）うときに何（なに）が必要（ひつよう）ですか。",
+   opts:["免許（めんきょ）","パスポート","電池（でんち）"],ans:0,
+   vi:"Sử dụng thiết bị phát sóng vô tuyến cần có <strong>giấy phép (免許)</strong> theo luật điện波.",
+   jp:"無線機を使用するには「免許」が必要です。"},
+
+  {id:75,q:"航空法（こうくうほう）では、ドローンを使（つか）うときに何（なに）が必要（ひつよう）ですか。",
+   opts:["飲酒（いんしゅ）","登録（とうろく）","日傘（ひがさ）"],ans:1,
+   vi:"Theo luật hàng không, khi dùng drone (100g trở lên) phải <strong>đăng ký (登録)</strong> với cơ quan chức năng.",
+   jp:"ドローン（100g以上）を使用するには「登録」が必要です。"},
+
+  {id:76,sec:"📋 Đề 3 — Phần 2: Các loại công trình xây dựng",
+   q:"駐車場工事（ちゅうしゃじょうこうじ）を始（はじ）める前（まえ）に何（なに）をしなければなりませんか。",
+   opts:["近所（きんじょ）の人（ひと）に挨拶する","自治体（じちたい）に届出（とどけで）する","車（くるま）をたくさん集める"],ans:1,
+   vi:"Trước khi thi công bãi đỗ xe, phải <strong>báo cáo cho cơ quan địa phương (自治体に届出)</strong>.",
+   jp:"駐車場工事の前には「自治体への届出」が必要です。"},
+
+  {id:77,q:"ダムの目的（もくてき）には、大雨（おおあめ）のときに川（かわ）の水（みず）をためて水害（すいがい）を防（ふせ）ぐ（　　）と、農業（のうぎょう）や工業（こうぎょう）に水（みず）を供給（きょうきゅう）する（　　）がある。",
+   opts:["治水（ちすい）と利水（りすい）","防災（ぼうさい）と排水（はいすい）","貯水（ちょすい）と浄水（じょうすい）"],ans:0,
+   vi:"<strong>治水</strong> = phòng chống lũ, <strong>利水</strong> = sử dụng nước cho nông nghiệp và công nghiệp.",
+   jp:"ダムの2つの目的：「治水（洪水防止）」と「利水（水の利用）」です。"},
+
+  {id:78,q:"ダム工事（こうじ）の特徴（とくちょう）として正しいものはどれか。",
+   opts:["小規模な工事で、重機（じゅうき）は使わない","ダムは山（やま）の中（なか）に作られることが多い","水道管（すいどうかん）の交換（こうかん）を行う工事である"],ans:1,
+   vi:"Vì địa hình Nhật nhiều núi, các con đập thường được xây <strong>ở vùng núi (山の中に多い)</strong>.",
+   jp:"ダムは「山の中」に作られることが多い大規模工事です。"},
+
+  {id:79,q:"河川（かせん）や海岸（かいがん）を守（まも）るために作（つく）られるものはどれか。",
+   opts:["防波堤（ぼうはてい）","トンネル","エレベーター"],ans:0,
+   vi:"<strong>Đê chắn sóng (防波堤)</strong> bảo vệ bờ biển khỏi thiên tai như sóng lớn và bão.",
+   jp:"海岸や港を守るために「防波堤」が作られます。"},
+
+  {id:80,q:"道路工事（どうろこうじ）に関係（かんけい）するものはどれか。",
+   opts:["アスファルトの舗装（ほそう）","エアコンの取付け","ビルの窓（まど）清掃（せいそう）"],ans:0,
+   vi:"Lát đường bằng nhựa đường <strong>(アスファルトの舗装)</strong> là một phần trong thi công đường giao thông.",
+   jp:"道路工事には「アスファルトの舗装」が含まれます。"},
+
+  {id:81,q:"トンネル工事（こうじ）が行（おこな）われる場所（ばしょ）はどれか。",
+   opts:["山（やま）","空港（くうこう）","海底（かいてい）ケーブル"],ans:0,
+   vi:"Đường hầm xuyên núi (山岳トンネル) được thi công bằng cách <strong>khoan vào núi (山)</strong> hoặc qua địa hình đồi núi.",
+   jp:"山岳トンネルは「山」の中を掘り進む工法で行われます。"},
+
+  {id:82,q:"山岳（さんがく）トンネルの工事（こうじ）で使（つか）われる方法（ほうほう）はどれか。",
+   opts:["NATM","塗装（とそう）","板金（ばんきん）"],ans:0,
+   vi:"<strong>NATM</strong> là phương pháp đào hầm trong đá cứng, dùng bê tông phun, khung thép và bu lông neo để cố định hầm.",
+   jp:"山岳トンネルでは「NATM」工法が使われます。"},
+
+  {id:83,q:"地表（ちひょう）から掘（ほ）り下げてトンネルを作（つく）る工法（こうほう）はどれか。",
+   opts:["山岳（さんがく）トンネル","開削（かいさく）トンネル","推進（すいしん）トンネル"],ans:1,
+   vi:"<strong>開削トンネル</strong> là phương pháp đào từ mặt đất xuống, xây hầm rồi lấp lại phần bên ngoài.",
+   jp:"地表から掘り下げる工法は「開削トンネル」工法です。"},
+
+  {id:84,q:"シールドマシンを使（つか）って掘削（くっさく）するトンネル工法（こうほう）はどれか。",
+   opts:["開削（かいさく）トンネル","山岳（さんがく）トンネル","シールドトンネル"],ans:2,
+   vi:"<strong>シールドトンネル</strong> dùng máy đào chuyên dụng, phù hợp với địa chất yếu hoặc khu vực có công trình phía trên.",
+   jp:"シールドマシンを使う工法は「シールドトンネル」工法です。"},
+
+  {id:85,q:"推進（すいしん）トンネルの工事（こうじ）に使（つか）われる管（かん）はどれか。",
+   opts:["紙管（かみかん）","コンクリート管（かん）","プラスチック管（かん）"],ans:1,
+   vi:"推進トンネル sử dụng <strong>ống bê tông (コンクリート管)</strong>, thép hoặc ống gang để chôn ngầm hạ tầng đô thị.",
+   jp:"推進トンネルには「コンクリート管」などが使われます。"},
+
+  {id:86,q:"橋（はし）を支（ささ）えるために行（おこな）う工事（こうじ）を何（なん）というか。",
+   opts:["上部工（じょうぶこう）","下部工（かぶこう）","装飾（そうしょく）工事"],ans:1,
+   vi:"<strong>下部工 (かぶこう)</strong> là phần móng và trụ đỡ của cầu, giúp cầu đứng vững và an toàn.",
+   jp:"橋の基礎部分（橋台や橋脚など）を作る工事を「下部工」といいます。"},
+
+  {id:87,q:"船（ふね）が波（なみ）の影響（えいきょう）を受けずに安全（あんぜん）にとまれるようにする施設（しせつ）はどれか。",
+   opts:["堤防（ていぼう）","防波堤（ぼうはてい）","トンネル","鉄道橋（てつどうばし）"],ans:1,
+   vi:"<strong>防波堤（ぼうはてい）</strong> là công trình ngăn sóng để bảo vệ cảng, giúp tàu neo đậu an toàn.",
+   jp:"波から港を守り、船が安全にとまれるようにする施設が「防波堤」です。"},
+
+  {id:88,q:"鉄道工事（てつどうこうじ）には、次（つぎ）のうちどのような工事（こうじ）が関（かか）わるか。",
+   opts:["電気設備工事（でんきせつびこうじ）","建築工事（けんちくこうじ）","土木工事（どぼくこうじ）","すべて"],ans:3,
+   vi:"Thi công đường sắt bao gồm <strong>tất cả các loại</strong>: điện, xây dựng, công trình dân dụng.",
+   jp:"鉄道工事には電気・建築・土木など「すべての」専門工事が関わります。"},
+
+  {id:89,q:"浄水場（じょうすいじょう）や下水処理場（げすいしょりじょう）の敷地（しきち）造成工事（ぞうせいこうじ）は、どのような工事（こうじ）に分類（ぶんるい）されますか。",
+   opts:["建築工事（けんちくこうじ）","機械工事（きかいこうじ）","土木工事（どぼくこうじ）"],ans:2,
+   vi:"Thi công khu vực cho nhà máy lọc nước được phân loại là <strong>công trình dân dụng (土木工事)</strong>.",
+   jp:"浄水場や処理場の敷地造成は「土木工事」に分類されます。"},
+
+  {id:90,q:"台風（たいふう）や豪雨（ごうう）、地震（じしん）などの自然（しぜん）災害（さいがい）で被害（ひがい）を受けた施設（しせつ）を直（なお）す工事（こうじ）は何（なん）ですか。",
+   opts:["災害復旧工事（さいがいふっきゅうこうじ）","配管工事（はいかんこうじ）","清掃工事（せいそうこうじ）"],ans:0,
+   vi:"Công trình phục hồi sau thiên tai gọi là <strong>災害復旧工事（さいがいふっきゅうこうじ）</strong>.",
+   jp:"自然災害で被害を受けた施設を直す工事が「災害復旧工事」です。"},
+
+  // ===== ĐỀ 4: Câu 91-120 =====
+  {id:91,sec:"📋 Đề 4 — Phần 1: Phân loại công trình",
+   q:"上水道施設工事（じょうすいどうしせつこうじ）に含まれない（ふくまれない）ものはどれですか。",
+   opts:["浄水場（じょうすいじょう）の建設（けんせつ）","配管（はいかん）の敷設（ふせつ）","電車（でんしゃ）の線路（せんろ）工事（こうじ）"],ans:2,
+   vi:"<strong>Công trình đường ray tàu điện (線路工事)</strong> là thi công đường sắt, không liên quan đến công trình cấp nước.",
+   jp:"電車の線路工事は「鉄道工事」であり、上水道工事には含まれません。"},
+
+  {id:92,q:"農業用（のうぎょうよう）や森林用（しんりんよう）の道路（どうろ）を整備（せいび）する工事（こうじ）も（　　）工事（こうじ）に含まれます。",
+   opts:["建築（けんちく）","土木（どぼく）","電気（でんき）"],ans:1,
+   vi:"Đường nông nghiệp và lâm nghiệp cũng thuộc phạm vi <strong>thi công đất đai (土木工事)</strong>.",
+   jp:"農道や林道の整備も「土木工事」に含まれます。"},
+
+  {id:93,q:"道路工事（どうろこうじ）では、白線（はくせん）を引いたり、標識（ひょうしき）などを（　　）する必要（ひつよう）があります。",
+   opts:["設置（せっち）","破壊（はかい）","撤去（てっきょ）"],ans:0,
+   vi:"Trong thi công đường, cần <strong>lắp đặt (設置)</strong> biển báo, đèn tín hiệu, vạch trắng...",
+   jp:"道路工事では標識や信号などを「設置」します。"},
+
+  {id:94,q:"次（つぎ）の中（なか）で、建築工事（けんちくこうじ）に含まれないものはどれですか。",
+   opts:["病院（びょういん）の建設（けんせつ）","橋（はし）の建設（けんせつ）","学校（がっこう）の建設（けんせつ）"],ans:1,
+   vi:"<strong>Xây cầu (橋の建設)</strong> là thi công đất đai (土木工事), không phải thi công xây dựng nhà (建築工事).",
+   jp:"「橋の建設」は土木工事であり、建築工事には含まれません。"},
+
+  {id:95,q:"掘削工事（くっさくこうじ）で土（つち）の壁（かべ）が崩れない（くずれない）ように支える（ささえる）ために（　　）を設置（せっち）する。",
+   opts:["支保工（しほこう）","看板（かんばん）","足場（あしば）"],ans:0,
+   vi:"<strong>支保工 (しほこう)</strong> là cấu trúc tạm để giữ tường đất không sập trong quá trình đào.",
+   jp:"土の壁が崩れないよう支える構造を「支保工」といいます。"},
+
+  {id:96,q:"杭工事（くいこうじ）に関（かん）する説明（せつめい）として正しいものを選びなさい（えらびなさい）。",
+   opts:["杭（くい）は建物（たてもの）の屋根（やね）に取り付ける部品である","杭（くい）は地中（ちちゅう）の支持層（しじそう）に届くように埋め込まれる","杭工事（くいこうじ）は壁（かべ）を塗（ぬ）る作業である"],ans:1,
+   vi:"Cọc được đóng xuống để chạm đến <strong>lớp đất chịu lực (支持層)</strong> nhằm đỡ trọng lượng công trình.",
+   jp:"杭は「地中の支持層に届くまで」埋め込まれます。"},
+
+  {id:97,q:"土工事（どこうじ）では、地面（じめん）を掘削（くっさく）し、出た（でた）土（つち）を（　　）などで運び出す（はこびだす）。",
+   opts:["ブルドーザー","ダンプトラック","クレーン車（しゃ）"],ans:1,
+   vi:"Đất đào ra thường được <strong>xe ben (ダンプトラック)</strong> chở đi.",
+   jp:"掘削で出た土は「ダンプトラック」などで運び出します。"},
+
+  {id:98,q:"「躯体工事（くたいこうじ）」に含まれないものはどれか。",
+   opts:["鉄筋工事（てっきんこうじ）","型枠工事（かたわくこうじ）","外構工事（がいこうこうじ）"],ans:2,
+   vi:"<strong>Công việc ngoại thất (外構工事)</strong> là phần ngoài (cổng, hàng rào...), không thuộc phạm vi 躯体工事.",
+   jp:"「外構工事」は建物外部の工事であり、躯体工事には含まれません。"},
+
+  {id:99,q:"鉄骨工事（てっこつこうじ）では、鉄骨（てっこつ）をクレーンで持（も）ち上げて、（　　）で締める（しめる）作業（さぎょう）が行われる。",
+   opts:["接着剤（せっちゃくざい）","ボルト","テープ"],ans:1,
+   vi:"Trong thi công kết cấu thép, các khung được siết chặt bằng <strong>bulong (ボルト)</strong>.",
+   jp:"鉄骨工事では鉄骨を「ボルト」で締めて接合します。"},
+
+  {id:100,q:"内外装仕上げ工事（ないがいそうしあげこうじ）に関係（かんけい）するものはどれか。",
+   opts:["コンクリート打設（だせつ）","建具（たてぐ）取付（とりつけ）","基礎工事（きそこうじ）"],ans:1,
+   vi:"Lắp đặt cửa <strong>(建具取付)</strong> là một phần của thi công hoàn thiện nội ngoại thất.",
+   jp:"「建具取付」は内外装仕上げ工事に含まれます。"},
+
+  {id:101,sec:"📋 Đề 4 — Phần 2: Công việc thi công chuyên môn",
+   q:"地震（じしん）の揺（ゆ）れに強（つよ）くして、建物（たてもの）の倒壊（とうかい）を防（ふせ）ぐ工事（こうじ）を何（なん）というか。",
+   opts:["防水工事（ぼうすいこうじ）","耐震工事（たいしんこうじ）","断熱工事（だんねつこうじ）"],ans:1,
+   vi:"<strong>耐震工事 (たいしんこうじ)</strong> là công việc gia cố để công trình chịu được động đất và không bị đổ sập.",
+   jp:"地震に強くして倒壊を防ぐ工事が「耐震工事」です。"},
+
+  {id:102,q:"建物（たてもの）にアンカーをあとから埋め込んで（うめこんで）設備（せつび）を取り付ける（とりつける）場合（ばあい）、このアンカーを何（なん）と呼ぶか。",
+   opts:["基礎（きそ）アンカー","あと施工（せこう）アンカー","鉄骨（てっこつ）アンカー"],ans:1,
+   vi:"Bu lông chuyên dụng gắn vào bê tông đã đông cứng được gọi là <strong>あと施工アンカー</strong>.",
+   jp:"コンクリート硬化後に取り付けるアンカーを「あと施工アンカー」といいます。"},
+
+  {id:103,q:"感電事故（かんでんじこ）を防止（ぼうし）するために、電気工事（でんきこうじ）の前（まえ）に必ず（かならず）行（おこな）うべきことはどれか。",
+   opts:["配線（はいせん）の色（いろ）を変える","照明（しょうめい）を点けておく","通電（つうでん）・停電（ていでん）の確認（かくにん）をする"],ans:2,
+   vi:"Trước khi thi công điện, cần <strong>xác nhận có điện hay không (通電・停電の確認)</strong> để tránh tai nạn giật điện.",
+   jp:"感電事故防止のため、電気工事前に「通電・停電の確認」が必須です。"},
+
+  {id:104,q:"都市ガス工事（としがすこうじ）で、主（おも）に行（おこな）われる作業（さぎょう）はどれか。",
+   opts:["ガス管（かん）の埋設（まいせつ）や接続（せつぞく）","電柱（でんちゅう）の設置（せっち）","水道（すいどう）メーターの交換（こうかん）"],ans:0,
+   vi:"Thi công gas thành phố chủ yếu là <strong>chôn ống và kết nối đường ống gas (ガス管の埋設や接続)</strong>.",
+   jp:"都市ガス工事では「ガス管の埋設や接続」が主な作業です。"},
+
+  {id:105,q:"上水道工事（じょうすいどうこうじ）では、きれいな水（みず）を建物（たてもの）に届けるために、どのような管（かん）が使（つか）われるか。",
+   opts:["排水管（はいすいかん）","配水管（はいすいかん）","通風管（つうふうかん）"],ans:1,
+   vi:"<strong>Ống phân phối nước (配水管)</strong> dẫn nước sạch từ nhà máy đến các khu dân cư và công trình.",
+   jp:"上水道では「配水管」で浄水場からきれいな水を届けます。"},
+
+  {id:106,q:"下水道工事（げすいどうこうじ）の目的（もくてき）はどれか。",
+   opts:["水道料金（すいどうりょうきん）を安くする","きれいな水（みず）を貯める","汚れた（よごれた）水（みず）を集めて処理（しょり）する"],ans:2,
+   vi:"Mục đích của công trình thoát nước là <strong>thu gom và xử lý nước bẩn (汚れた水を処理)</strong> để đảm bảo vệ sinh.",
+   jp:"下水道工事の目的は「汚れた水を集めて処理すること」です。"},
+
+  {id:107,q:"冷凍空調設備工事（れいとうくうちょうせつびこうじ）の目的（もくてき）は何（なに）か。",
+   opts:["電気料金（でんきりょうきん）を下げること","快適（かいてき）な空気（くうき）の温度（おんど）や湿度（しつど）を調整（ちょうせい）すること","部屋（へや）の照明（しょうめい）を増やすこと"],ans:1,
+   vi:"冷凍空調設備工事 nhằm <strong>điều chỉnh nhiệt độ và độ ẩm (温度・湿度を調整)</strong> để tạo không khí dễ chịu.",
+   jp:"冷凍空調設備工事は「快適な温度・湿度の調整」を目的とします。"},
+
+  {id:108,q:"給排水衛生設備工事（きゅうはいすいえいせいせつびこうじ）では、どのような器具（きぐ）が設置（せっち）されるか。",
+   opts:["照明器具（しょうめいきぐ）","水（みず）や湯（ゆ）を供給（きょうきゅう）する器具（きぐ）","空調機器（くうちょうきき）"],ans:1,
+   vi:"Thi công này bao gồm lắp đặt các thiết bị <strong>cấp thoát nước và nước nóng</strong>.",
+   jp:"給排水衛生設備工事では「水や湯を供給する器具」が設置されます。"},
+
+  {id:109,q:"保温（ほおん）・保冷工事（ほれいこうじ）の目的（もくてき）はどれか。",
+   opts:["管（かん）や設備（せつび）を飾（かざ）ること","配管（はいかん）などの温度（おんど）を適切（てきせつ）に保（たも）つこと","電気配線（でんきはいせん）をまとめること"],ans:1,
+   vi:"Thi công cách nhiệt/giữ lạnh nhằm <strong>duy trì nhiệt độ thích hợp cho ống dẫn và thiết bị</strong>.",
+   jp:"保温・保冷工事は「配管などの温度を適切に保つ」ことを目的とします。"},
+
+  {id:110,q:"消防設備工事（しょうぼうせつびこうじ）で設置（せっち）される設備（せつび）として正しいものはどれか。",
+   opts:["テレビアンテナ","スプリンクラー","換気扇（かんきせん）"],ans:1,
+   vi:"<strong>スプリンクラー</strong> là thiết bị chữa cháy tự động phun nước khi nhiệt độ đạt ngưỡng, bắt buộc lắp theo quy định.",
+   jp:"「スプリンクラー」は消防設備の代表的な設備です。"},
+
+  {id:111,sec:"📋 Đề 4 — Phần 3: Công việc đào đắp",
+   q:"地面（じめん）を掘（ほ）って建物（たてもの）の基礎（きそ）を作（つく）るために行（おこな）う作業（さぎょう）は何（なん）というか。",
+   opts:["根切（ねぎ）り","運搬（うんぱん）","整地（せいち）"],ans:0,
+   vi:"<strong>根切り (ねぎり)</strong> là việc đào đất để làm móng công trình.",
+   jp:"建物の基礎を作るために地面を掘ることを「根切り」といいます。"},
+
+  {id:112,q:"岩石（がんせき）を破壊（はかい）して取り除く（とりのぞく）作業（さぎょう）で火薬類（かやくるい）を使（つか）う方法（ほうほう）は何（なん）というか。",
+   opts:["積（つ）み込（こ）み","発破（はっぱ）","押土（おしど）"],ans:1,
+   vi:"Phá đá bằng thuốc nổ gọi là <strong>発破 (はっぱ)</strong>.",
+   jp:"火薬類を使って岩石を破壊する方法を「発破」といいます。"},
+
+  {id:113,q:"斜面（しゃめん）やでこぼこした土地（とち）に土（つち）を盛（も）って平（たい）らにする作業（さぎょう）は何（なん）というか。",
+   opts:["切土（きりど）","盛土（もりつち）","埋戻（うめもど）し"],ans:1,
+   vi:"Đắp đất vào chỗ dốc/không phẳng để tạo mặt bằng gọi là <strong>盛土 (もりど)</strong>.",
+   jp:"土を盛って平らにする作業を「盛土」といいます。"},
+
+  {id:114,q:"基礎工事（きそこうじ）などが終（お）わったあとに、掘（ほ）ったところを土（つち）で埋（う）める作業（さぎょう）はどれか。",
+   opts:["埋戻（うめもど）し","盛土（もりつち）","締（しめ）固（かた）め"],ans:0,
+   vi:"Lấp đất lại sau khi xây móng hoặc công trình ngầm gọi là <strong>埋戻し (うめもどし)</strong>.",
+   jp:"工事後に掘ったところを土で埋める作業を「埋戻し」といいます。"},
+
+  {id:115,q:"法面（ほうめん）の崩壊（ほうかい）を防（ふせ）ぐために、植生基材（しょくせいきざい）を使（つか）って草（くさ）などを植える（うえる）方法（ほうほう）はどれか。",
+   opts:["モルタル吹き付け（ふきつけ）","植生工法（しょくせいこうほう）","鉄筋挿入（てっきんそうにゅう）"],ans:1,
+   vi:"Phủ thực vật bằng hạt giống, phân bón lên mặt dốc gọi là <strong>植生工法 (しょくせいこうほう)</strong>.",
+   jp:"植生基材などを使って草を植える方法を「植生工法」といいます。"},
+
+  {id:116,q:"推進トンネル工事（すいしんトンネルこうじ）では、工場（こうじょう）で作（つく）られた何（なに）を地中（ちちゅう）に押し込んで（おしこんで）トンネルを作るか。",
+   opts:["ブロック","木材（もくざい）","管（かん）"],ans:2,
+   vi:"Trong 推進トンネル, <strong>ống (管)</strong> được chế tạo sẵn và đẩy vào lòng đất bằng máy ép.",
+   jp:"推進トンネル工事では工場で作られた「管」を地中に押し込みます。"},
+
+  {id:117,q:"海（うみ）や川（かわ）の底（そこ）の土砂（どしゃ）を取り除く（とりのぞく）工事（こうじ）は、何（なん）と呼ばれるか。",
+   opts:["埋立（うめたて）工事（こうじ）","浚渫（しゅんせつ）工事（こうじ）","整地（せいち）工事（こうじ）"],ans:1,
+   vi:"Nạo vét đáy biển/sông gọi là <strong>浚渫工事 (しゅんせつこうじ)</strong>.",
+   jp:"海や川の底の土砂を取り除く工事を「浚渫工事」といいます。"},
+
+  {id:118,q:"新しい（あたらしい）土地（とち）をつくるために、海（うみ）などに土砂（どしゃ）を集める（あつめる）工事（こうじ）は何（なに）か。",
+   opts:["浚渫（しゅんせつ）工事（こうじ）","山留（やまどめ）工事（こうじ）","埋立（うめたて）工事（こうじ）"],ans:2,
+   vi:"Dùng đất cát lấp biển tạo đất liền mới gọi là <strong>埋立工事 (うめたてこうじ)</strong>.",
+   jp:"海などに土砂を入れて新しい土地を作る工事を「埋立工事」といいます。"},
+
+  {id:119,q:"船（ふね）が荷物（にもつ）を積（つ）んだり降（お）ろしたりするために停（と）まる場所（ばしょ）を作（つく）る工事（こうじ）は何（なに）か。",
+   opts:["トンネル工事（こうじ）","岸壁（がんぺき）工事（こうじ）","防波堤（ぼうはてい）工事（こうじ）"],ans:1,
+   vi:"Công trình xây nơi tàu thuyền neo đậu để bốc/dỡ hàng gọi là <strong>岸壁工事 (がんぺきこうじ)</strong>.",
+   jp:"船が荷物を積み降ろしする施設を作る工事を「岸壁工事」といいます。"},
+
+  {id:120,q:"波（なみ）が港（みなと）に入（はい）らないようにするための施設（しせつ）を作（つく）る工事（こうじ）は何（なに）か。",
+   opts:["岸壁（がんぺき）工事（こうじ）","橋梁（きょうりょう）工事（こうじ）","防波堤（ぼうはてい）工事（こうじ）"],ans:2,
+   vi:"Công trình xây đê ngăn sóng cho cảng gọi là <strong>防波堤工事 (ぼうはていこうじ)</strong>.",
+   jp:"波が港に入らないようにする施設を作る工事を「防波堤工事」といいます。"},
+];
+
+// ===== STATE =====
+let answered={}, correct=0, wrong=0, done=0;
+
+// ===== RENDER =====
+function render(){
+  const wrap=document.getElementById('quizWrap');
+  // Keep result panel
+  const rp=document.getElementById('resultPanel');
+  wrap.innerHTML='';
+  wrap.appendChild(rp);
+
+  let curSec='';
+  QS.forEach((q,i)=>{
+    if(q.sec && q.sec!==curSec){
+      curSec=q.sec;
+      const st=document.createElement('div');
+      st.className='section-title';
+      st.innerHTML=`${q.sec} <span>${countSec(q.sec)} câu</span>`;
+      wrap.appendChild(st);
+    }
+    wrap.appendChild(buildCard(q,i));
+  });
+}
+
+function countSec(sec){
+  return QS.filter(q=>q.sec===sec).length;
+}
+
+function buildCard(q,idx){
+  const card=document.createElement('div');
+  card.className='q-card';
+  card.id='card_'+idx;
+
+  const optsHtml=q.opts.map((o,i)=>`
+    <li class="opt" id="opt_${idx}_${i}" onclick="selectOpt(${idx},${i})">
+      <span class="opt-key">${String.fromCharCode(65+i)}</span>
+      <span>${o}</span>
+      <span class="opt-icon"></span>
+    </li>`).join('');
+
+  card.innerHTML=`
+    <div class="q-num-row">
+      <span class="q-num">第${q.id}問</span>
+      <span class="q-pts">4点</span>
+    </div>
+    <div class="q-text">${q.q}</div>
+    <ul class="opts">${optsHtml}</ul>
+    <button class="check-btn" id="btn_${idx}" disabled onclick="checkQ(${idx})">こたえを確認する</button>
+    <div class="explain" id="ex_${idx}"></div>
+  `;
+  return card;
+}
+
+// ===== INTERACTION =====
+function selectOpt(qidx,oidx){
+  if(answered[qidx]!==undefined) return;
+  const opts=document.querySelectorAll(`[id^="opt_${qidx}_"]`);
+  opts.forEach(o=>o.classList.remove('selected'));
+  document.getElementById(`opt_${qidx}_${oidx}`).classList.add('selected');
+  document.getElementById(`btn_${qidx}`).disabled=false;
+  document.getElementById(`btn_${qidx}`).dataset.sel=oidx;
+}
+
+function checkQ(qidx){
+  const btn=document.getElementById(`btn_${qidx}`);
+  const sel=parseInt(btn.dataset.sel);
+  const q=QS[qidx];
+  const opts=document.querySelectorAll(`[id^="opt_${qidx}_"]`);
+
+  answered[qidx]=sel;
+  btn.disabled=true;
+
+  const isCorrect=(sel===q.ans);
+  if(isCorrect) correct++; else wrong++;
+  done++;
+
+  opts.forEach((o,i)=>{
+    o.classList.remove('selected');
+    if(i===q.ans){o.classList.add('correct');o.querySelector('.opt-icon').textContent='✅';}
+    else if(i===sel&&!isCorrect){o.classList.add('wrong');o.querySelector('.opt-icon').textContent='❌';}
+    else o.classList.add('disabled');
+    o.onclick=null;
+  });
+
+  const card=document.getElementById('card_'+qidx);
+  card.classList.add('answered');
+  card.classList.add(isCorrect?'all-correct':'has-wrong');
+
+  // Show explanation
+  const ex=document.getElementById('ex_'+qidx);
+  const ansKey=String.fromCharCode(65+q.ans);
+  ex.innerHTML=`
+    <div class="explain-header">
+      <span class="ans-mark">こたえ：</span>
+      <span class="ans-correct">${ansKey}. ${q.opts[q.ans]}</span>
+      <span style="margin-left:4px;font-size:20px">${isCorrect?'🎉':'💡'}</span>
+    </div>
+    <div class="explain-body">
+      🇻🇳 ${q.vi}
+      <div class="jp">🇯🇵 ${q.jp}</div>
+    </div>
+  `;
+  ex.classList.add('show');
+
+  updateScore();
+  checkAllDone();
+}
+
+function updateScore(){
+  document.getElementById('sc-done').textContent=done;
+  document.getElementById('sc-cor').textContent=correct;
+  document.getElementById('sc-wrg').textContent=wrong;
+  const pct=Math.round(done/QS.length*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-text').textContent=pct+'% hoàn thành';
+}
+
+function checkAllDone(){
+  if(done===QS.length){
+    document.getElementById('submitBtn').disabled=false;
+  }
+}
+
+function submitAll(){
+  const total=QS.length*4;
+  const score=correct*4;
+  const pct=Math.round(correct/QS.length*100);
+  let msg='';
+  if(pct>=90) msg='🏆 Xuất sắc! Bạn sẵn sàng thi thật rồi!';
+  else if(pct>=70) msg='👍 Khá tốt! Ôn thêm một chút nữa nhé!';
+  else if(pct>=50) msg='📚 Cần ôn thêm. Đừng nản, cố lên!';
+  else msg='💪 Cần luyện tập nhiều hơn. Xem lại lý thuyết nhé!';
+
+  document.getElementById('resScore').innerHTML=`${score}<span>/${total}</span>`;
+  document.getElementById('resMsg').textContent=msg;
+  document.getElementById('res-cor').textContent=correct;
+  document.getElementById('res-wrg').textContent=wrong;
+  document.getElementById('res-pct').textContent=pct+'%';
+
+  const rp=document.getElementById('resultPanel');
+  rp.classList.add('show');
+  rp.scrollIntoView({behavior:'smooth'});
+}
+
+function retry(){
+  answered={};correct=0;wrong=0;done=0;
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('submitBtn').disabled=true;
+  updateScore();
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== INIT =====
+render();
+</script>
+</body>
+</html>
